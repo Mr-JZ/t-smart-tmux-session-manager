@@ -223,6 +223,19 @@ if [ "$SESSION" = "" ]; then # session is missing
 	SESSION="$SESSION_NAME"
 	if [ -e $RESULT/.t ]; then
 		tmux new-session -d -s "$SESSION" -c "$RESULT" $RESULT/.t # create session and run .t startup script
+	elif [ -e $RESULT/.env/bin/activate.fish ]; then
+		tmux new-session -d -s "$SESSION" -c "$RESULT"
+		tmux send-keys -t $SESSION "source .env/bin/activate.fish" ENTER
+		tmux send-keys -t $SESSION "nvim ." ENTER
+
+		# Split the terminal into two panes, with 80% and 20% of the height
+		tmux split-window -t "$SESSION" -c "$RESULT" -v -p 20
+
+		# Send commands to the panes
+		tmux send-keys -t $SESSION:1 "source .env/bin/activate.fish" ENTER
+
+		# You can also start another shell or command in the second pane if needed
+		# tmux send-keys -t "$SESSION:1" "your_command_here" C-m
 	else
 		tmux new-session -d -s "$SESSION" -c "$RESULT" # create session
 	fi
